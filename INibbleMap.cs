@@ -13,5 +13,7 @@ public interface INibbleMap
     public void AllocateCodeChunk(ulong codeStart, uint codeSize);
 
     public ulong FindMethodCode(ulong currentPC);
+
+    public void DeleteMethodCode(ulong codeHeader);
 }
 

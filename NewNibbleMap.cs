@@ -89,7 +89,7 @@ public class NewNibbleMap : INibbleMap
 
         public MapUnit WriteNibble(MapKey mapIdx, uint value)
         {
-            Debug.Assert(value >= 0 && value < 15);
+            Debug.Assert(value >= 0 && value < 15, "Nibble value out of bounds");
             uint mask = ~(0xFu << mapIdx.GetNibbleShift());
             uint nibble = (value + 1) << mapIdx.GetNibbleShift();
 
@@ -120,7 +120,7 @@ public class NewNibbleMap : INibbleMap
 
         public Nibble(int value)
         {
-            Debug.Assert(value >= 0 && value <= 0xF);
+            Debug.Assert(value >= 0 && value <= 0xF, "Nibble value out of bounds");
             RawValue = (uint)value;
         }
 
@@ -133,7 +133,7 @@ public class NewNibbleMap : INibbleMap
         {
             get
             {
-                Debug.Assert(RawValue != 0);
+                Debug.Assert(RawValue != 0, "Can not get target byte offset when nibble is uninitialized");
                 return (uint)(RawValue - 1) * MapUnit.SizeInBytes;
             }
         }
@@ -214,16 +214,14 @@ public class NewNibbleMap : INibbleMap
         ulong nibbleIndex = (delta / 32) % 8;
         int nibbleShift = (int)(nibbleIndex * 4);
 
-        uint oldValue = memoryRegion.ReadDWord(mapBase + dwordIndex * sizeof(uint));
+        MapUnit oldValue = memoryRegion.ReadDWord(mapBase + dwordIndex * sizeof(uint));
 
         // write initial nibble
 
         // ensure not overwritting existing
         // TODO: also assert that the dword is not a pointer
-        if((oldValue & (0xFul << nibbleShift)) != 0)
-        {
-            throw new InvalidOperationException("Overwriting existing offset");
-        }
+        Debug.Assert((oldValue & (0xFul << nibbleShift)) == 0, "Overwriting existing nibble");
+        Debug.Assert(oldValue.State != MapUnit.DWordState.Pointer, "Overwriting existing pointer");
 
         // some value between 1 - 8
         uint nibbleValue = (uint)(delta % 32u / 4u) + 1;
@@ -289,6 +287,8 @@ public class NewNibbleMap : INibbleMap
         }
 
         // #5 repeat steps 1, 2, and 4 for the previous DWORD
+        // no preceeding DWORD, return null pointer
+        if (dwordIndex == 0) return 0;
         dwordIndex--;
         nibbleIndex = 7;
 
@@ -315,7 +315,56 @@ public class NewNibbleMap : INibbleMap
             }
         }
 
-        return ulong.MaxValue;
+        return 0;
+    }
+
+    public void DeleteMethodCode(ulong codeHeader)
+    {
+        if (codeHeader < codeRegionStart)
+        {
+            throw new ArgumentException("Code start address is below the map base");
+        }
+        if (codeHeader > codeRegionStart + codeRegionSize)
+        {
+            throw new ArgumentException("Code start address is above the code map end");
+        }
+
+        ulong delta = codeHeader - codeRegionStart;
+
+        ulong dwordIndex = delta / 256;
+        ulong nibbleIndex = (delta / 32) % 8;
+        int nibbleShift = (int)(nibbleIndex * 4);
+
+        MapUnit dword = memoryRegion.ReadDWord(mapBase + dwordIndex * sizeof(uint));
+        Debug.Assert(dword.State == MapUnit.DWordState.Nibbles, "Code header pointing to DWORD not representing Nibbles");
+
+        Nibble nib = dword.GetNibble((byte)nibbleIndex);
+        Debug.Assert(!nib.IsEmpty, "Code header pointing to nibble which is not initialized");
+
+        // some value between 1 - 8
+        uint nibbleValue = (uint)(delta % 32u / 4u) + 1;
+        uint newValue = dword & ~(0xFu << nibbleShift);
+
+        memoryRegion.WriteDWord(mapBase + dwordIndex * sizeof(uint), newValue);
+
+        // remove following pointers
+        ulong nextDwordIndex = dwordIndex + 1;
+
+        while(((int)nextDwordIndex + 1) * sizeof(uint) <= memoryRegion.Data.Length)
+        {
+            dword = memoryRegion.ReadDWord(mapBase + nextDwordIndex * sizeof(uint));
+            if(dword.State == MapUnit.DWordState.Pointer)
+            {
+                // Clear pointer
+                memoryRegion.WriteDWord(mapBase + nextDwordIndex * sizeof(uint), 0x0u);
+
+                nextDwordIndex++;
+            } else
+            {
+                return;
+            }
+        }
+
     }
 
     public override string ToString()

@@ -20,18 +20,18 @@ public class MemoryRegion
 
     public uint ReadDWord(ulong address)
     {
-        Debug.Assert(address >= BaseAddress);
+        Debug.Assert(address >= BaseAddress, "Address is below the base address");
         int offset = (int)(address - BaseAddress);
-        Debug.Assert(offset + 4 <= Data.Length);
+        Debug.Assert(offset + 4 <= Data.Length, "DWORD goes out of bounds");
 
         return BitConverter.ToUInt32(Data, offset);
     }
 
     public unsafe void WriteDWord(ulong address, uint value)
     {
-        Debug.Assert(address >= BaseAddress);
+        Debug.Assert(address >= BaseAddress, "Address is below the base address");
         int offset = (int)(address - BaseAddress);
-        Debug.Assert(offset + 4 <= Data.Length);
+        Debug.Assert(offset + 4 <= Data.Length, "DWORD goes out of bounds");
 
         byte* bytes = (byte*)&value;
 

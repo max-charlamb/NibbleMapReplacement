@@ -12,6 +12,8 @@ namespace NibbleMapReplacement.tests;
 public abstract class NibbleMapTest<T>
     where T : class, INibbleMap
 {
+    record FunctionBlock(ulong codeStart, uint size);
+
     [Fact]
     public void BasicNibbleWriteTest()
     {
@@ -77,9 +79,79 @@ public abstract class NibbleMapTest<T>
         }
     }
 
-    record FunctionBlock(ulong codeStart, uint size);
+    [Fact]
+    public void SetThenDelete()
+    {
+        ulong codeRegionBase = 0x0000_1000;
+        uint size = 1024;
+
+        INibbleMap nibbleMap = T.Create(codeRegionBase, size);
+
+        List<FunctionBlock> blocks = [];
+        blocks.Add(new(codeRegionBase, 39));
+        blocks.Add(new(codeRegionBase + 40, 32));
+        blocks.Add(new(codeRegionBase + 100, 512));
+
+        foreach (FunctionBlock block in blocks)
+        {
+            nibbleMap.AllocateCodeChunk(block.codeStart, block.size);
+        }
+
+        foreach (FunctionBlock block in blocks)
+        {
+            nibbleMap.DeleteMethodCode(block.codeStart);
+        }
+
+        foreach (FunctionBlock block in blocks)
+        {
+            for (ulong i = 0; i < block.size; i++)
+            {
+                ulong actualMethodCode = nibbleMap.FindMethodCode(block.codeStart + i);
+                actualMethodCode.Should().Be(0, $"search value: {block.codeStart + i}, Function starts at {block.codeStart} with size {block.size}");
+            }
+        }
+    }
 
     [Fact]
+    public void FullLengthMethod()
+    {
+        ulong codeRegionBase = 0x0000_1000;
+        uint size = 1024;
+
+        INibbleMap nibbleMap = T.Create(codeRegionBase, size);
+
+        List<FunctionBlock> blocks = [];
+        blocks.Add(new(codeRegionBase, 1024));
+
+        foreach (FunctionBlock block in blocks)
+        {
+            nibbleMap.AllocateCodeChunk(block.codeStart, block.size);
+        }
+
+        foreach (FunctionBlock block in blocks)
+        {
+            for (ulong i = 0; i < block.size; i++)
+            {
+                ulong actualMethodCode = nibbleMap.FindMethodCode(block.codeStart + i);
+                actualMethodCode.Should().Be(block.codeStart, $"search value: {block.codeStart + i}, Function starts at {block.codeStart} with size {block.size}");
+            }
+        }
+
+        foreach (FunctionBlock block in blocks)
+        {
+            nibbleMap.DeleteMethodCode(block.codeStart);
+        }
+
+        foreach (FunctionBlock block in blocks)
+        {
+            for (ulong i = 0; i < block.size; i++)
+            {
+                ulong actualMethodCode = nibbleMap.FindMethodCode(block.codeStart + i);
+                actualMethodCode.Should().Be(0, $"search value: {block.codeStart + i}, Function starts at {block.codeStart} with size {block.size}");
+            }
+        }
+    }
+
     public void RandomizedNibbleWrite()
     {
         ulong codeRegionBase = 0x0000_0000;

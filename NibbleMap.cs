@@ -228,7 +228,11 @@ public class NibbleMap : INibbleMap
     public static INibbleMap Create(ulong codeRegionStart, ulong codeRegionSize) => 
         new NibbleMap(codeRegionStart, codeRegionSize);
 
-    public void AllocateCodeChunk(ulong codeStart, uint codeSize)
+    public void AllocateCodeChunk(ulong codeStart, uint codeSize) => AllocateCodeChunk(codeStart, true);
+
+    public void DeleteMethodCode(ulong codeHeader) => AllocateCodeChunk(codeHeader, false);
+
+    private void AllocateCodeChunk(ulong codeStart, bool bSet)
     {
         // paraphrased from EEJitManager::NibbleMapSetUnlocked
         if (codeStart < codeRegionStart)
@@ -237,7 +241,6 @@ public class NibbleMap : INibbleMap
         }
         ulong delta = codeStart - codeRegionStart;
         ulong pos = Addr2Pos(delta);
-        bool bSet = true;
         uint value = bSet ? Addr2Offs(delta) : 0;
 
         uint index = (uint)(pos >> Log2NibblesPerDword);
