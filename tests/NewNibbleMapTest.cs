@@ -18,7 +18,7 @@ public class NewNibbleMapTest
         List<uint> ints = [0, uint.MaxValue - 3, 0x1000];
         foreach (uint i in ints)
         {
-            MapUnit t = MapUnit.WriteDirectPointer(i);
+            MapUnit t = NewNibbleMap.EncodePointer(i);
 
             t.State.Should().Be(MapUnit.DWordState.Pointer, $"test value: {i}");
 

@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static NibbleMapReplacement.Constants;
@@ -14,15 +16,16 @@ public class NewNibbleMap : INibbleMap
     private readonly ulong codeRegionStart;
     private readonly ulong codeRegionSize;
 
-    public const ulong mapBase = 0x00001000;
+    public const ulong mapBase = 0x7efab5b5fb30;
 
     private NewNibbleMap(ulong codeRegionStart, ulong codeRegionSize)
     {
         this.codeRegionStart = codeRegionStart;
         this.codeRegionSize = codeRegionSize;
 
-        uint mapBytesNeeded = (uint)((codeRegionSize + 63) / 64);
-        uint mapDwordsNeeded = (mapBytesNeeded + 3) / 4;
+        codeRegionSize = (codeRegionSize + (4096u - 1u)) & ~(4096u - 1u);
+
+        uint mapDwordsNeeded = (uint)(codeRegionSize / 256) + 1;
 
         memoryRegion = new(mapBase, mapDwordsNeeded * 4);
     }
@@ -60,7 +63,7 @@ public class NewNibbleMap : INibbleMap
             get {
                 if(Value == 0) return DWordState.Empty;
                 
-                Nibble nib0 = GetNibble(0);
+                Nibble nib0 = GetNibble(7);
 
                 // If nib0 is greater than or equal to 8, implies pointer.
                 if (nib0.IsEmpty || nib0.Value < 8)
@@ -99,7 +102,7 @@ public class NewNibbleMap : INibbleMap
 
         public uint GetPointer()
         {
-            uint nibble = GetNibble(0).Value;
+            uint nibble = GetNibble(7).Value;
 
             return (Value & ~0xFu) + ((nibble - 8) << 2);
         }
@@ -128,15 +131,6 @@ public class NewNibbleMap : INibbleMap
         public bool IsEmpty => RawValue == 0;
 
         public uint Value => !IsEmpty ? RawValue - 1 : throw new InvalidOperationException("This nibble is empty");
-
-        public ulong TargetByteOffset
-        {
-            get
-            {
-                Debug.Assert(RawValue != 0, "Can not get target byte offset when nibble is uninitialized");
-                return (uint)(RawValue - 1) * MapUnit.SizeInBytes;
-            }
-        }
     }
 
     // The key to the map is the index of an individual nibble
@@ -177,18 +171,25 @@ public class NewNibbleMap : INibbleMap
         // nibble in the least significant position.
         internal int GetNibbleShift()
         {
-            return NibbleIndexInMapUnit * 4;  // bit shift - 4 bits per nibble
+            return 28 - (NibbleIndexInMapUnit * 4);  // bit shift - 4 bits per nibble
         }
     }
 
     private static ulong MapToRelativeAddress(ulong dwordIndex, ulong nibbleIndex, ulong nibbleValue) =>
         dwordIndex * 256 + nibbleIndex * 32 + nibbleValue * 4;
 
-    public static uint PointerToDword(uint pointer)
+    public static uint EncodePointer(uint pointer)
     {
         uint top28 = pointer & ~0xFu;
         uint bottom4 = ((pointer & 0xFu) >>> 2) + 8 + 1;
-        return new MapUnit(top28 + bottom4);
+        return top28 + bottom4;
+    }
+
+    public static uint DecodePointer(uint dword)
+    {
+        uint nibble = dword & 0xfu;
+
+        return (dword & ~0xFu) + ((nibble - 8 - 1) << 2);
     }
 
     public static INibbleMap Create(ulong codeRegionStart, ulong codeRegionSize)
@@ -206,13 +207,11 @@ public class NewNibbleMap : INibbleMap
             throw new ArgumentException("Code end is above the code map end");
         }
 
-        ulong delta = codeStart - codeRegionStart;
-
-        ulong lastMethodData = delta + codeSize;
+        uint delta = (uint)(codeStart - codeRegionStart);
 
         ulong dwordIndex = delta / 256;
         ulong nibbleIndex = (delta / 32) % 8;
-        int nibbleShift = (int)(nibbleIndex * 4);
+        int nibbleShift = 28 - (int)(nibbleIndex * 4);
 
         MapUnit oldValue = memoryRegion.ReadDWord(mapBase + dwordIndex * sizeof(uint));
 
@@ -230,12 +229,11 @@ public class NewNibbleMap : INibbleMap
         memoryRegion.WriteDWord(mapBase + dwordIndex * sizeof(uint), newValue);
 
         // if the function completely covers the following dwords, write the relative pointer
-        uint pointer = PointerToDword((uint)delta);
-        ulong nextDwordIndex = dwordIndex + 2;
-        while (nextDwordIndex * 256 <= lastMethodData)
+        ulong lastMethodData = delta + codeSize;
+        ulong nextDwordIndex = dwordIndex + 1;
+        while ((nextDwordIndex + 1) * 256 <= lastMethodData)
         {
-            ulong dwordToWrite = nextDwordIndex - 1;
-            memoryRegion.WriteDWord(mapBase + dwordToWrite * sizeof(uint), pointer);
+            memoryRegion.WriteDWord(mapBase + nextDwordIndex * sizeof(uint), EncodePointer(delta));
             nextDwordIndex++;
         }
     }
@@ -253,7 +251,7 @@ public class NewNibbleMap : INibbleMap
         // #2 if DWORD is a pointer, then we are done
         if(dword.State is MapUnit.DWordState.Pointer)
         {
-            return dword.GetPointer() + codeRegionStart;
+            return DecodePointer(dword) + codeRegionStart;
         }
 
         // #3 if DWORD is nibbles and corresponding nibble is intialized, return the corresponding address
@@ -269,14 +267,23 @@ public class NewNibbleMap : INibbleMap
         }
 
         // #4 find preceeding nibble and return if found
-        // TODO: get rid of loop using CLZ
-        if(nibbleIndex != 0)
+
+        //for (int i = (int)nibbleIndex - 1; i >= 0; i--)
+        //{
+        //    Nibble nib = dword.GetNibble((byte)i);
+        //    if (!nib.IsEmpty)
+        //    {
+        //        return dwordIndex * 256ul + (uint)i * 32 + nib.Value * 4 + codeRegionStart;
+        //    }
+        //}
+
+        if (nibbleIndex != 0)
         {
-            uint maskNibbleAndHigher = (~0x0u >>> (32 - (int)nibbleIndex * 4));
-            uint clz = uint.LeadingZeroCount(dword.Value & maskNibbleAndHigher);
-            if(clz != 32)
+            uint preceedingNibbleMask = (~0x0u << (32 - (int)nibbleIndex * 4));
+            uint ctz = uint.TrailingZeroCount(dword.Value & preceedingNibbleMask);
+            if (ctz != 32)
             {
-                uint firstSetBitPos = 31 - clz;
+                uint firstSetBitPos = 31 - ctz;
                 uint nibbleToCheck = firstSetBitPos / 4;
                 Nibble nib = dword.GetNibble((byte)nibbleToCheck);
                 if (!nib.IsEmpty)
@@ -298,20 +305,33 @@ public class NewNibbleMap : INibbleMap
         // #5.2 if DWORD is a pointer, then we are done
         if (dword.State is MapUnit.DWordState.Pointer)
         {
-            return dword.GetPointer() + codeRegionStart;
+            return DecodePointer(dword) + codeRegionStart;
         }
 
         // #5.4 find preceeding nibble and return if found
+
+        //for (int i = (int)nibbleIndex; i >= 0; i--)
+        //{
+        //    Nibble nib = dword.GetNibble((byte)i);
+        //    if (!nib.IsEmpty)
+        //    {
+        //        return dwordIndex * 256ul + (uint)i * 32 + nib.Value * 4 + codeRegionStart;
+        //    }
+        //}
+
         // Since we want to check the entire DWORD, no need to mask
         if (dword != 0)
         {
-            uint clz = uint.LeadingZeroCount(dword.Value);
-            uint firstSetBitPos = 31 - clz;
-            uint nibbleToCheck = firstSetBitPos / 4;
-            Nibble nib = dword.GetNibble((byte)nibbleToCheck);
-            if (!nib.IsEmpty)
+            uint ctz = uint.TrailingZeroCount(dword.Value);
+            if (ctz != 32)
             {
-                return dwordIndex * 256ul + nibbleToCheck * 32 + nib.Value * 4 + codeRegionStart;
+                uint firstSetBitPos = 31 - ctz;
+                uint nibbleToCheck = firstSetBitPos / 4;
+                Nibble nib = dword.GetNibble((byte)nibbleToCheck);
+                if (!nib.IsEmpty)
+                {
+                    return dwordIndex * 256ul + nibbleToCheck * 32 + nib.Value * 4 + codeRegionStart;
+                }
             }
         }
 
@@ -333,7 +353,7 @@ public class NewNibbleMap : INibbleMap
 
         ulong dwordIndex = delta / 256;
         ulong nibbleIndex = (delta / 32) % 8;
-        int nibbleShift = (int)(nibbleIndex * 4);
+        int nibbleShift = 28 - (int)(nibbleIndex * 4);
 
         MapUnit dword = memoryRegion.ReadDWord(mapBase + dwordIndex * sizeof(uint));
         Debug.Assert(dword.State == MapUnit.DWordState.Nibbles, "Code header pointing to DWORD not representing Nibbles");
@@ -353,7 +373,7 @@ public class NewNibbleMap : INibbleMap
         while(((int)nextDwordIndex + 1) * sizeof(uint) <= memoryRegion.Data.Length)
         {
             dword = memoryRegion.ReadDWord(mapBase + nextDwordIndex * sizeof(uint));
-            if(dword.State == MapUnit.DWordState.Pointer)
+            if(dword.State == MapUnit.DWordState.Pointer && DecodePointer(dword) == delta)
             {
                 // Clear pointer
                 memoryRegion.WriteDWord(mapBase + nextDwordIndex * sizeof(uint), 0x0u);

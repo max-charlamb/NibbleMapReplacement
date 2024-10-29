@@ -22,7 +22,7 @@ public class MemoryRegion
     {
         Debug.Assert(address >= BaseAddress, "Address is below the base address");
         int offset = (int)(address - BaseAddress);
-        Debug.Assert(offset + 4 <= Data.Length, "DWORD goes out of bounds");
+        Debug.Assert(offset + 4 <= Data.Length, $"{address} - {BaseAddress} = {offset} <= {Data.Length} goes out of bounds");
 
         return BitConverter.ToUInt32(Data, offset);
     }
@@ -31,7 +31,7 @@ public class MemoryRegion
     {
         Debug.Assert(address >= BaseAddress, "Address is below the base address");
         int offset = (int)(address - BaseAddress);
-        Debug.Assert(offset + 4 <= Data.Length, "DWORD goes out of bounds");
+        Debug.Assert(offset + 4 <= Data.Length, $"{address} - {BaseAddress} = {offset} <= {Data.Length} goes out of bounds");
 
         byte* bytes = (byte*)&value;
 
@@ -41,9 +41,31 @@ public class MemoryRegion
         }
     }
 
+    public void WriteToFile()
+    {
+        var path = @"C:\Users\maxcharlamb\OneDrive - Microsoft\Desktop\out.txt";
+        File.WriteAllText(path, ToString());
+    }
+
     public override string ToString()
     {
-        return BitConverter.ToString(Data);
+        StringBuilder sb = new StringBuilder();
+        for(int i = 4; i < Data.Length; i += 4)
+        {
+            sb.Append(Convert.ToHexString(Data, i - 1, 1));
+            sb.Append(Convert.ToHexString(Data, i - 2, 1));
+            sb.Append(Convert.ToHexString(Data, i - 3, 1));
+            sb.Append(Convert.ToHexString(Data, i - 4, 1));
+
+            if ((i) % 16 == 0)
+            {
+                sb.AppendLine();
+            } else
+            {
+                sb.Append(' ');
+            }
+        }
+        return sb.ToString();
     }
 }
 
