@@ -1,554 +1,153 @@
-﻿using System.Text.Json.Nodes;
+﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NibbleMapReplacement;
+
 class Program
 {
-
-    public static void Main()
+    static void Main(string[] args)
     {
-        Console.WriteLine("TEST");
+        C1 c = new();
 
-        ThingA test = new ThingA();
+        c.M6();
+    }
+}
 
-        for(int i = 12; i >= 0; i--)
+unsafe class C1
+{
+    public void M1()
+    {
+        try
+        {
+            Block();
+        }
+        catch
+        {
+        }
+    }
+
+    public void M2()
+    {
+        try
+        {
+            throw new Exception();
+        }
+        catch
+        {
+            Block();
+        }
+    }
+
+    public void M3()
+    {
+        try
+        {
+            throw new Exception();
+        }
+        catch (Exception e) when (F1(e))
+        {
+
+        }
+    }
+
+    public void M4()
+    {
+        try
+        {
+            Console.ReadLine();
+            throw new Exception();
+        }
+        catch (Exception e) when (F2(e))
+        {
+
+        }
+    }
+
+    public void M5()
+    {
+        var handle = GCHandle.Alloc(this);
+        var fptr = (delegate* unmanaged<IntPtr, int, void>)&U1;
+        fptr(GCHandle.ToIntPtr(handle), 4);
+        handle.Free();
+    }
+
+    public void M6()
+    {
+        var m1 = typeof(C1).GetMethod("M5");
+        m1.Invoke(this, null);
+    }
+
+    public void M7()
+    {
+        P1();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void P1()
+    {
+        try
         {
             try
             {
-                f(false, i);
+                P2();
             }
-            catch (Exception e)
+            finally
             {
-                Console.WriteLine(e.StackTrace);
+                P3();
             }
         }
-        Console.ReadLine();
+        catch
+        {
+            Block();
+        }
     }
 
-
-
-
-    public static string LongMethod(string t)
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void P2()
     {
-        string t2 = t + "test";
-        string t3 = t2 + "test2";
+        throw new Exception();
+    }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void P3()
+    {
+        throw new Exception();
+    }
+
+    [UnmanagedCallersOnly]
+    private static void U1(IntPtr ptr, int method)
+    {
+        var c = (C1)GCHandle.FromIntPtr(ptr).Target;
+        switch (method)
+        {
+            case 1: c.M1(); break;
+            case 2: c.M2(); break;
+            case 3: c.M3(); break;
+            case 4: c.M4(); break;
+            case 5: c.M5(); break;
+            case 6: c.M6(); break;
+            case 7: c.M7(); break;
+        }
+    }
+
+    private bool F1(Exception e)
+    {
+        Block();
         throw new NotImplementedException();
     }
 
-    public static void f(bool t, int i)
+    private bool F2(Exception e)
     {
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 11) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 10) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 9) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 8) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 7) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 6) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 5) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 4) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 3) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if (i == 1) throw new NotImplementedException();
-        if (t) { Console.WriteLine("Hello World"); }
-        if(i == 0) throw new NotImplementedException();
-        f(t, i - 1);
+        M2();
+        throw new NotImplementedException();
     }
 
+    public void Block()
+    {
+        Console.WriteLine($"Thread ID: {Thread.CurrentThread.ManagedThreadId}");
+        Console.ReadLine();
+    }
 }

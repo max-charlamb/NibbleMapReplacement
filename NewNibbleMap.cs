@@ -254,41 +254,34 @@ public class NewNibbleMap : INibbleMap
             return DecodePointer(dword) + codeRegionStart;
         }
 
-        // #3 if DWORD is nibbles and corresponding nibble is intialized, return the corresponding address
-        // TODO: fix to check if the mapped value preceeds the currentPC
-        if(dword.State is MapUnit.DWordState.Nibbles)
+        if (dword != 0)
         {
-            Nibble nib = dword.GetNibble((byte)nibbleIndex);
-            if (!nib.IsEmpty)
+            // #3 if DWORD is nibbles and corresponding nibble is intialized, return the corresponding address
+            // TODO: fix to check if the mapped value preceeds the currentPC
+            if (dword.State is MapUnit.DWordState.Nibbles)
             {
-                ulong codeStart = dwordIndex * 256 + nibbleIndex * 32 + nib.Value * 4 + codeRegionStart;
-                if (codeStart <= currentPC) return codeStart;
-            }
-        }
-
-        // #4 find preceeding nibble and return if found
-
-        //for (int i = (int)nibbleIndex - 1; i >= 0; i--)
-        //{
-        //    Nibble nib = dword.GetNibble((byte)i);
-        //    if (!nib.IsEmpty)
-        //    {
-        //        return dwordIndex * 256ul + (uint)i * 32 + nib.Value * 4 + codeRegionStart;
-        //    }
-        //}
-
-        if (nibbleIndex != 0)
-        {
-            uint preceedingNibbleMask = (~0x0u << (32 - (int)nibbleIndex * 4));
-            uint ctz = uint.TrailingZeroCount(dword.Value & preceedingNibbleMask);
-            if (ctz != 32)
-            {
-                uint firstSetBitPos = 31 - ctz;
-                uint nibbleToCheck = firstSetBitPos / 4;
-                Nibble nib = dword.GetNibble((byte)nibbleToCheck);
+                Nibble nib = dword.GetNibble((byte)nibbleIndex);
                 if (!nib.IsEmpty)
                 {
-                    return dwordIndex * 256ul + nibbleToCheck * 32 + nib.Value * 4 + codeRegionStart;
+                    ulong codeStart = dwordIndex * 256 + nibbleIndex * 32 + nib.Value * 4 + codeRegionStart;
+                    if (codeStart <= currentPC) return codeStart;
+                }
+            }
+
+            // #4 find preceeding nibble and return if found
+            if (nibbleIndex != 0)
+            {
+                uint preceedingNibbleMask = (~0x0u << (32 - (int)nibbleIndex * 4));
+                uint ctz = uint.TrailingZeroCount(dword.Value & preceedingNibbleMask);
+                if (ctz != 32)
+                {
+                    uint firstSetBitPos = 31 - ctz;
+                    uint nibbleToCheck = firstSetBitPos / 4;
+                    Nibble nib = dword.GetNibble((byte)nibbleToCheck);
+                    if (!nib.IsEmpty)
+                    {
+                        return dwordIndex * 256ul + nibbleToCheck * 32 + nib.Value * 4 + codeRegionStart;
+                    }
                 }
             }
         }
