@@ -1,18 +1,262 @@
 ﻿using System;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace NibbleMapReplacement;
-
 class Program
 {
     static void Main(string[] args)
     {
         C1 c = new();
 
-        c.M6();
+        //Task.Run(c.M1);
+        //Task.Run(c.M2);
+        //Task.Run(c.M3);
+        //Task.Run(c.M4);
+        //Task.Run(c.M5);
+        //Task.Run(c.M6);
+        //Task.Run(c.M7);
+
+        //c.Block();
+
+        //c.Block();
+        //c.M6();
+
+        //HijackTest hijack = new();
+        //hijack.Test();
+
+        //FaultingExceptionTest fef = new();
+        //fef.TestLoop();
+
+        RedirectedThreadFrame rtf = new();
+        rtf.Test();
+    }
+}
+
+class RedirectedThreadFrame
+{
+    public volatile bool flag;
+    public volatile int num;
+
+    public RedirectedThreadFrame()
+    {
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public void Test()
+    {
+        // sxe clr
+        Console.ReadLine();
+        var cts = new CancellationTokenSource();
+        cts.CancelAfter(500);
+        ControlledExecution.Run(Work, cts.Token);
+
+        while (!flag)
+        {
+            TestLoop();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+    public void TestLoop()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            num++;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public void Work()
+    {
+        try
+        {
+            while (!flag)
+            {
+                TestLoop();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+}
+
+class HijackTest
+{
+    public volatile bool flag;
+    public volatile int num;
+
+    public HijackTest()
+    {
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public void Test()
+    {
+        // bu coreclr!ThreadSuspend::SuspendEE step out then look at the main thread.
+        Console.ReadLine();
+
+        Task.Run(Work);
+        while (!flag)
+        {
+            TestLoop();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+
+    public void TestLoop()
+    {
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+        num++;
+    }
+
+
+    public void Work()
+    {
+        Thread.Sleep(500);
+        GC.Collect();
+    }
+}
+
+class FaultingExceptionTest
+{
+    public volatile bool flag;
+    public volatile int num;
+
+    public FaultingExceptionTest()
+    {
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public void Test()
+    {
+        // bu coreclr!ThrowControlForThread
+        Console.ReadLine();
+        var cts = new CancellationTokenSource();
+        cts.CancelAfter(500);
+        ControlledExecution.Run(Work, cts.Token);
+        
+        while (!flag)
+        {
+            TestLoop();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+    public void TestLoop()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            if (num > 10000)
+            {
+                Console.WriteLine("num is greater than 10000");
+            }
+            num++;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public void Work()
+    {
+        try
+        {
+            while (!flag)
+            {
+                TestLoop();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 }
 
@@ -57,7 +301,6 @@ unsafe class C1
     {
         try
         {
-            Console.ReadLine();
             throw new Exception();
         }
         catch (Exception e) when (F2(e))
