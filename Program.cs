@@ -22,17 +22,17 @@ class Program
 
         //c.Block();
 
-        //c.Block();
-        //c.M6();
+        c.Block();
+        c.M6();
 
         //HijackTest hijack = new();
         //hijack.Test();
 
         //FaultingExceptionTest fef = new();
-        //fef.TestLoop();
+        //fef.Test();
 
-        RedirectedThreadFrame rtf = new();
-        rtf.Test();
+        //RedirectedThreadFrame rtf = new();
+        //rtf.Test();
     }
 }
 
@@ -45,15 +45,17 @@ class RedirectedThreadFrame
     {
     }
 
+    // Configure WinDBG to break on clr exceptions
+    // (sxe clr)
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public void Test()
     {
-        // sxe clr
-        Console.ReadLine();
         var cts = new CancellationTokenSource();
         cts.CancelAfter(500);
+        
+        // use ControlledExecution with a cancellation token to trigger a
+        // thread abort with a try/catch
         ControlledExecution.Run(Work, cts.Token);
-
         while (!flag)
         {
             TestLoop();
@@ -86,123 +88,42 @@ class RedirectedThreadFrame
     }
 }
 
-class HijackTest
+class HijackTest()
 {
     public volatile bool flag;
     public volatile int num;
 
-    public HijackTest()
-    {
-    }
-
+    // Set breakpoint at ThreadSuspend::SuspendEE then step out and look at the main thread stack
+    // (bu coreclr!ThreadSuspend::SuspendEE)
+    // Note: HijackFrames are not used on Windows if CET is enabled. Either test on non-Windows
+    // or disable CET by modifying Thread::AreShadowStacksEnabled to return false.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public void Test()
     {
-        // bu coreclr!ThreadSuspend::SuspendEE step out then look at the main thread.
-        Console.ReadLine();
-
+        // start other thread that will force a GC collection.
         Task.Run(Work);
+
+        // run loop checking volatile variable to generate non-interruptible code.
         while (!flag)
         {
             TestLoop();
         }
     }
-
-    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
-
-    public void TestLoop()
-    {
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-        num++;
-    }
-
-
     public void Work()
     {
         Thread.Sleep(500);
         GC.Collect();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+    public void TestLoop()
+    {
+        num++; num++; num++; num++; num++;
+        num++; num++; num++; num++; num++;
+        num++; num++; num++; num++; num++;
+        num++; num++; num++; num++; num++;
+        num++; num++; num++; num++; num++;
+        num++; num++; num++; num++; num++;
     }
 }
 

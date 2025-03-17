@@ -8,6 +8,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StartupObject>NibbleMapReplacement.Program</StartupObject>
+    <CETCompat>false</CETCompat>
   </PropertyGroup>
 
   <ItemGroup>
